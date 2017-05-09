@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<link rel="stylesheet" href="./static/semantic/css/semantic.min.css"/>
+<link href="./static/asset/prettify.css" rel="stylesheet">
+<link href="./static/toc/toc.css" rel="stylesheet">
+<link rel="stylesheet" href="./static/parm.css"/>
+<link rel="stylesheet" href="./static/asset/sons-of-obsidian.css"/>
+<link rel="stylesheet" href="./static/ui.totop.css"/>
+
+<title>Jitter(抖动) - 信号完整性工程师笔记</title>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</head>
+<body>
+
+
+
+<!-- Navbar
+================================================== -->
+<div class="navbar">
+  <div class="ui small secondary inverted borderless menu">
+    
+    <a class="active item" href="./index.html">Home</a>
+    
+    <div class="right menu">
+      
+        
+<div class="item">
+  <div class="ui icon input">
+    <form id="searchform">
+    <input name="q" type="text" placeholder="Search...">
+    </form>
+  </div>
+</div>
+
+      
+      <div class="ui dropdown item">
+        Select Languages <i class="icon dropdown"></i>
+        <div class="menu">
+          <a class="item language" href="../en/index.html" data-lang="en">English</a>
+          <a class="item language" href="../zh_CN/index.html" data-lang="zh_CN">中文</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="ui divided grid">
+    <div class="four wide column" id="side-bar">
+        <div id="toc" class="content"></div>
+    </div> 
+    
+    <div class="twelve wide column" id="markdown-content">
+    
+        
+<div class="chapter-next chapter-top pull-right">
+    <a next-chapter href="./prbs.html">PRBS算法 <i class="fa fa-long-arrow-right"></i></a>
+</div>
+        
+        <h1 id="title_1">Jitter(抖动)<a class="anchor" href="#title_1">&para;</a></h1>
+<h2 id="title_1-1">TIE(Time Interval Error)<a class="anchor" href="#title_1-1">&para;</a></h2>
+<p>TIE是抖动分析的基础，抖动分析中的peak-peak jitter，jitter分离都是基于TIE。 如图所示，TIE是比较理想时钟(图中Golden clock)和被测量时钟(图中Jitter Clock)之间的相位偏差</p>
+<p><img src="../images/TIE.png" title="TIE"/>
+</p>
+<h2 id="title_1-2">理想时钟(Golden clock)的概念<a class="anchor" href="#title_1-2">&para;</a></h2>
+<p>其中的理想时钟概念最为关键，理想时钟不能凭空产生， 所以需要知道理想时钟的来源。在测量仪器中，理想时钟的产生一般有如下的方法:</p>
+<ul>
+<li>固定时钟(Constant Clock)</li>
+<li>嵌入时钟(Self triggered CRU)</li>
+<li>独立的时钟(Explicit clock CRU)</li>
+</ul>
+<p>固定时钟，相当于示波器自己通过采样的信号，平均之后计算出理想的时钟。 可以看作是CRU的带宽无限大。</p>
+<p>嵌入时钟，是自己采用自己，当然需要通过低通滤波器，可以选择为1阶或者2阶。 CRU的阶数取决于使用什么标准去测。</p>
+<p>独立时钟，应用于带有Forward Clock的系统。比如HDMI系统，有单独的clock通道。</p>
+<p>总而言之，采用哪一种恢复理想时钟的方法取决于具体的应用，不同的CRU或者带宽 测量出的jitter会有差别，而TIE的分析则必须有理想时钟，所以要正确的选择CRU 恢复出理想时钟。</p>
+<h2 id="title_1-3">TIE的分析方法<a class="anchor" href="#title_1-3">&para;</a></h2>
+<p>TIE是最原始数据，可以在不同的角度来看待，其中有时域的Time trend, 频域(对时域FFT)以及统计域(直方图histogram)。</p>
+<p>下图是泰克示波器抖动分析软件的Time trend图,横坐标 是时间，间隔是UI； 纵坐标是抖动值，即前述的理想和被测量时钟之间的误差。 通过Time Trend图可以看出一些直观的信息，比如这个抖动是接近于正弦波， 但有一些噪声，还可以看出peak-peak Jitter(注意这个概念， 详细可以看[这里](#Peak-Peak Jitter和Total Jitter的关系)</p>
+<p><img src="../images/TIE-time-trend.png" title="TIE Time Trend"/>
+</p>
+<p>下图是TIE频谱，通过对Time trend做FFT可以通过频域分析，通过频谱 可以清晰的看出抖动的频点是7MHz。横坐标是频率，纵坐标是对于FFT的值，图中单位 是ps，只是相对值，并不是代表能量。</p>
+<p><img src="../images/TIE-spectrum.png" title="TIE Spectrum"/>
+</p>
+<p>下图是统计域的直方图，可以看出抖动分布。横坐标是抖动值，纵坐标 是每个bin里面抖动值出现的次数。如果是仅随机抖动，就会呈现出正态分布，而由于 本例是正弦波抖动，所以呈现的正弦抖动。</p>
+<p><img src="../images/TIE-histogram.png" title="TIE Histogram"/>
+</p>
+<div class="ui info message">
+<p>小结: TIE是抖动分析的基础，TIE是去掉了主频之后的相位 (相位可以通过UI换算成时间)域信息，理想时钟的获取取决于实际应用的需求， 不同的CRU类型和带宽，测量出的jitter值可能会不一样。TIE分析可以至少从三个 方面，时域time trend，频率的FFT，以及统计域的直方图。</p>
+
+</div>
+<h2 id="title_1-4">Peak-Peak Jitter和Total Jitter的关系<a class="anchor" href="#title_1-4">&para;</a></h2>
+<p>在测量中抖动描述有很多中方法，其中的Peak-Peak Jitter和Total Jitter是比较容易混淆的概念。</p>
+<p>Peak-Peak Jitter可以看出是实时示波器一次采样时间范围的抖动。示波器单次采用的 时间由采样率和存储深度(Record Length)决定。例如一个20Gsa/s,存储深度为20Mpts 的单次采样，时间长度为1ms。如果被测试信号是1Gbps速率，则可以采样10^6 个周期 TIE分析也就是基于这 10^6 UI的每个UI的抖动，peak-peak jitter也就是基于这个简单计算peak-peak值。 假定示波器存储深度是无限的，那么测量出的peak-peak值也是无穷大的，应为到一定限度之后，RJ 的长尾效应会显现出来。</p>
+<p>Total Jitter的概念，一般基于抖动分离算法。通用的模型是双狄拉克模型， 抖动分离出 $R_J$ 和 $D_J$ , 然后基于BER，对 $R_J$ 外插出Total Jitter，其公式如下。 一般的 $R_J$ 系数比较大，如下表所示,属于悲观估计。</p>
+<p>$$T_J = Q(BER)*R_J + D_J$$</p>
+<p>QBER系数对应表</p>
+<table class="ui collapsing celled table segment">
+<thead>
+<tr><th>BER</th><th>QBER</th><th>BER</th><th>QBER</th><th>BER</th><th>QBER</th></tr>
+</thead>
+<tbody>
+<tr><td>$1\times10^{-3}$</td><td>6.180</td><td>$1\times10^{-10}$</td><td>12.723</td><td>$1\times10^{-17}$</td><td>16.987</td></tr>
+<tr><td>$1\times10^{-4}$</td><td>7.438</td><td>$1\times10^{-11}$</td><td>13.412</td><td>$1\times10^{-18}$</td><td>17.514</td></tr>
+<tr><td>$1\times10^{-5}$</td><td>8.530</td><td>$1\times10^{-12}$</td><td>14.069</td><td>$1\times10^{-19}$</td><td>18.026</td></tr>
+<tr><td>$1\times10^{-6}$</td><td>9.507</td><td>$1\times10^{-13}$</td><td>14.698</td><td>$1\times10^{-20}$</td><td>18.524</td></tr>
+<tr><td>$1\times10^{-7}$</td><td>10.399</td><td>$1\times10^{-14}$</td><td>15.301</td><td>$1\times10^{-21}$</td><td>19.010</td></tr>
+<tr><td>$1\times10^{-8}$</td><td>11.224</td><td>$1\times10^{-15}$</td><td>15.882</td><td>$1\times10^{-22}$</td><td>19.484</td></tr>
+<tr><td>$1\times10^{-9}$</td><td>11.996</td><td>$1\times10^{-16}$</td><td>16.444</td><td>$1\times10^{-23}$</td><td>20.000</td></tr>
+</tbody></table>
+
+<div class="ui info message">
+<p>小结: 这2个概念属于不同的算法得出的Jitter值，用于不同的分析场合，不能混用。</p>
+
+</div>
+<h2 id="title_1-5">带宽和抖动传递的关系<a class="anchor" href="#title_1-5">&para;</a></h2>
+<p>先提出问题，对于PLL，CRU变大还是变小，jitter才能小? 对于串行数据，情况又是怎么样?</p>
+<h2 id="title_1-6">仪器产生抖动的方法<a class="anchor" href="#title_1-6">&para;</a></h2>
+<p>抖动的种类，很多书上<sup id="fnref-li2007jitter"><a href="#fn-li2007jitter" class="footnote-rel inner">1</a></sup>都有详细的描述</p>
+<h2 id="title_1-7">抖动产生算法<a class="anchor" href="#title_1-7">&para;</a></h2>
+<h2 id="title_1-8">抖动分析算法<a class="anchor" href="#title_1-8">&para;</a></h2>
+<div class="footnotes"><ol>
+<li id="fn-li2007jitter">
+<p> Mike Peng Li. <em>Jitter, noise, and signal integrity at high-speed</em>.  Pearson Education, 2007.</p>
+
+<a class="footnote-backref inner" href="#fnref-li2007jitter">&#8617;</a>
+
+</li>
+</ol></div>
+        
+        <div class="ui blue inverted small label">
+            <i class="icon download"></i><a href="./jitter.md">View Source</a>
+        </div>
+        <div class="ui blue inverted small label">
+            <i class="icon help link" data-html="<b>&larr;</b> Prev Chapter <b>&rarr;</b> Next Chapter<br/><b>h</b> Index Page"></i>
+        </div>
+        
+        
+    </div>
+</div>
+
+<div class="ui page grid">
+    <div class="column">
+    <!-- disqus -->
+    
+    </div>
+</div>
+
+<div class="ui page grid" id="footer">
+    <div class="column">
+    
+<p>Designed by Limodou, Copyright 2017, Niu Li</p>
+<p>CSS framework <a href="https://github.com/twitter/bootstrap">Bootstrap</a>, Markdown parser lib <a href="https://github.com/limodou/par">Par</a> and this page is created by <a href="https://github.com/limodou/parm">Parm</a> tool.</p>
+
+    </div>
+</div>
+
+
+<script>
+var relpath = '.';
+</script>
+
+<script type="text/javascript" src="./static/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="./static/semantic/javascript/semantic.min.js"></script>
+<script src="./static/asset/prettify.js"></script>
+<script src="./static/toc/toc.js"></script>
+<script src="./static/jquery.ui.totop.js"></script>
+<script src="./static/jquery.hotkeys.js"></script>
+<script src="./static/jquery.sticky-kit.min.js"></script>
+<script src="./static/docs.js"></script>
+<script src="./static/comment.js"></script>
+
+
+
+
+    
+<script type="text/javascript">
+$(function(){
+    var form = $('#searchform');
+    form.submit(function(e){
+        e.preventDefault();
+        var wq=$('input[name="q"]').val();
+        var link="http://www.google.com/search?q=site:leeooox.github.io/avs/zh_CN "+wq;
+        window.open(link);
+
+    });
+});
+</script>
+
+
+
+<script>
+$(function(){
+    $('.navbar .ui.dropdown').dropdown({
+        on: 'hover'
+    });
+    $('a.language').on('click', function(){
+        $.cookie('language', $(this).data('lang'), { expires: 360, path: '/' });
+        window.location.href = "./../"+$(this).data('lang')+'/index.html';
+    });
+});
+</script>
+</body>
+</html>
