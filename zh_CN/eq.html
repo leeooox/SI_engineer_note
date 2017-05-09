@@ -142,7 +142,7 @@ plt.show()</code></pre>
 <li>pre-shoot 是受pre cursor控制</li>
 <li>需要长 <strong>0</strong> 或者 长 <strong>1</strong> pattern才能看出de-emphasis/pre-shoot效应</li>
 </ol>
-<p><img src="../images/dB_EQ_relation.PNG"/>
+<p><img src="../images/dB_EQ_relation.png"/>
 </p>
 <p>下面可以做一个简单的计算，如果tap系数为[0.75,-0.25],这表明$C_{-1}=0$, $C_{0}=0.75$,$C_{1}=-0.25$ 带入公式得到:</p>
 <p>$$ deemphasis = 20log_{10}\left(\frac{C_{-1}+C_0+C_1}{C_{-1}+C_0-C_1}\right) = 20log_{10}\left(\frac{0+0.75-0.25}{0+0.75-0.25}\right) =-6dB $$</p>
