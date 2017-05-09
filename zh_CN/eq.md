@@ -55,7 +55,7 @@ Pre cursor 和 post cursor的区别，是tap相对于main tap的位置。
 
 下图表示出了channel response中cursor的位置
 
-![](../images/pre_vs_post_cursor.PNG)
+![](../images/pre_vs_post_cursor.png)
 
 
 
@@ -74,7 +74,7 @@ Pre cursor 和 post cursor的区别，是tap相对于main tap的位置。
 3. 需要长 **0** 或者 长 **1** pattern才能看出de-emphasis/pre-shoot效应
 
 
-![](../images/dB_EQ_relation.PNG) 
+![](../images/dB_EQ_Relation.png) 
 
 
 下面可以做一个简单的计算，如果tap系数为[0.75,-0.25],这表明$C_{-1}=0$,
