@@ -94,7 +94,29 @@
 <p><img src="../images/6dB_FR_compare.png"/>
 </p>
 <p>其Python源代码如下：</p>
-<p class="error">Can't find the file ../code/plot_FIR_FR_compare.py</p>
+<pre class="prettyprint linenums"><code>import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+
+data_rate = 5 #Gbps
+taps = [0.75,-0.25]
+
+taps2 = np.array( [0.75,-0.25])*2
+
+w,h = signal.freqz(taps)
+
+plt.plot(w/np.pi*2.5, 20 * np.log10(abs(h)), 'b',label="de-emphasis")
+
+w,h = signal.freqz(taps2)
+
+plt.plot(w/np.pi*2.5, 20 * np.log10(abs(h)), 'r',label="pre-emphasis")
+plt.ylabel('Amplitude [dB]', color='b')
+plt.xlabel('Frequency (GHz)')
+plt.grid()
+plt.legend(loc="best")
+
+plt.show()</code></pre>
+
 <h3 id="title_1-1-2">Pre-emphasis几种不同的名称<a class="anchor" href="#title_1-1-2">&para;</a></h3>
 <div class="ui info message">
 <p>Pre-emphasis == FFE(Feed forward equalizer) == FIR filter == Convolve</p>
